@@ -53,8 +53,11 @@ namespace BookStore
             }
 
          while (true)
-               {
-                   Console.WriteLine("1. Add Book");
+            {
+                Console.WriteLine("Wellcome to BookStore");
+                Console.WriteLine("");
+                Console.WriteLine("");
+                Console.WriteLine("1. Add Book");
                    Console.WriteLine("2. Search Book");
                    Console.WriteLine("3. List All Books");
                    Console.WriteLine("4. Exit");
@@ -129,8 +132,28 @@ namespace BookStore
                             Console.WriteLine("Book not found.");
                         }
                         break;
+                    case 5:
+                        Console.Write("Enter filename to save books: ");
+                        string filename = Console.ReadLine();
+                        bookManager.SaveBooksToFile(filename);
 
-                       case 5:
+
+                        string desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                        string filePath = Path.Combine(desktopPath,"BookData.txt");
+
+                        bookManager.SaveBooksToFile(filePath);
+                        break;
+                    case 6:
+                        Console.Write("Enter filename to load books: ");
+                        filename = Console.ReadLine();
+                        bookManager.LoadBooksFromFile(filename);
+                        break;
+                    case 7:
+                        Console.Write("Enter the ID of the book to delete: ");
+                         int.TryParse(Console.ReadLine(), out int bookIdForDel);
+                        bookManager.DeleteBook(bookIdForDel);
+                        break;
+                    case 8:
                            Environment.Exit(0);
                            break;
                        default:
