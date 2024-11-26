@@ -9,6 +9,17 @@ namespace BookStore
 {
     public class BookManager
     {
+        private List<Book> _books;
+        private List<Book> favoriteBooks = new List<Book>();
+        public BookManager()
+        {
+            _books = new List<Book>();
+        }
+
+        public BookManager(List<Book> books)
+        {
+            _books = new List<Book>(books);
+        }
         private List<Book> books = new List<Book>();
 
         public void AddBook(Book book)
@@ -25,7 +36,20 @@ namespace BookStore
 
         public List<Book> SearchBooks(string searchTxt)
         {
-            return books.Where(b => b.Title.Contains(searchTxt) || b.Author.Contains(searchTxt) || b.PublicationYear.ToString().Contains(searchTxt)).ToList();
+            if (string.IsNullOrEmpty(searchTxt))
+            {
+                // Return a copy to avoid modifying original list
+                return new List<Book>(books); 
+            }
+
+            searchTxt = searchTxt.Trim(); 
+            int publicationYear;
+
+            return books.Where(b =>
+                b.Title.ToLower().Contains(searchTxt.ToLower()) ||
+                b.Author.ToLower().Contains(searchTxt.ToLower()) ||
+                (int.TryParse(searchTxt, out publicationYear) && b.PublicationYear == publicationYear)
+            ).ToList();
         }
 
         public Book GetBookById(int id)
@@ -33,11 +57,31 @@ namespace BookStore
             return books.FirstOrDefault(b => b.Id == id);
         }
 
-        public void SaveBooksToFile(string filePath)
+        public void SaveBooksToFile(string fileName, List<Book> favoriteBooks)
         {
-            string json = JsonSerializer.Serialize(books);
-            File.WriteAllText(filePath, json);
+            string filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, fileName);
+
+            try
+            {
+                string json = JsonSerializer.Serialize(favoriteBooks);
+
+                if (!File.Exists(filePath))
+                {
+                    // Create the file if it doesn't exist
+                    using (File.Create(filePath)) { }
+                }
+
+                // Write the JSON data to the file
+                File.WriteAllText(filePath, json);
+
+                Console.WriteLine("Favorite books saved to file successfully.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error saving favorite books to file: " + ex.Message);
+            }
         }
+
 
         public void LoadBooksFromFile(string filePath)
         {

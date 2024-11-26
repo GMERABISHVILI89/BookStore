@@ -11,19 +11,7 @@ namespace BookStore
         static async Task Main(string[] args)
         {
             BookManager bookManager = new BookManager();
-
-            using (HttpClient client = new HttpClient())
-            {
-               // string apiUrl = "https://jsonplaceholder.typicode.com/posts";
-               // string responseBody = await client.GetStringAsync(apiUrl);
-
-                //List<Book> books = JsonSerializer.Deserialize<List<Book>>(responseBody);
-
-                // Take the first 15 books
-                // books = books.Take(15).ToList();
-
-                // data of popular authors to their books and publication years
-                List<Book> popularAuthors = new List<Book>()
+            List<Book> popularAuthors = new List<Book>()
                 {
                 new Book {Id = 1, Author = "J.R.R. Tolkien", Title = "The Lord of the Rings", PublicationYear = 1954 },
                 new Book {Id = 2, Author = "J.R.R. Tolkien", Title = "The Hobbit", PublicationYear = 1937 },
@@ -42,7 +30,21 @@ namespace BookStore
                 new Book {Id = 15, Author = "Leo Tolstoy", Title = "War and Peace", PublicationYear = 1869 }
                 };
           
-                for (int i = 0; i < 15; i++)
+            
+            using (HttpClient client = new HttpClient())
+            {
+
+               // string apiUrl = "https://jsonplaceholder.typicode.com/posts";
+               // string responseBody = await client.GetStringAsync(apiUrl);
+
+                //List<Book> books = JsonSerializer.Deserialize<List<Book>>(responseBody);
+
+                // Take the first 15 books
+                // books = books.Take(15).ToList();
+
+                // data of popular authors to their books and publication years
+
+                for (int i = 0; i < popularAuthors.Count; i++)
                 {
                   //  books[i] = popularAuthors[i];
 
@@ -51,20 +53,33 @@ namespace BookStore
                 }
 
             }
-
-         while (true)
+            Console.WriteLine("Wellcome to BookStore");
+            while (true)
             {
-                Console.WriteLine("Wellcome to BookStore");
+             
                 Console.WriteLine("");
+                Console.WriteLine("Enter Your Choice : ");
                 Console.WriteLine("");
                 Console.WriteLine("1. Add Book");
-                   Console.WriteLine("2. Search Book");
-                   Console.WriteLine("3. List All Books");
-                   Console.WriteLine("4. Exit");
+                Console.WriteLine("****************");
+                Console.WriteLine("2. Search Book");
+                Console.WriteLine("****************");
+                Console.WriteLine("3. List All Books");
+                Console.WriteLine("****************");
+                Console.WriteLine("4. Edit Book");
+                Console.WriteLine("****************");
+                Console.WriteLine("5. Save Book List");
+                Console.WriteLine("****************");
+                Console.WriteLine("6. Get Favorite Book List ");
+                Console.WriteLine("****************");
+                Console.WriteLine("7. Delete Book ");
+                Console.WriteLine("****************");
+                Console.WriteLine("8. Exit");
                     
                     
-                   Console.Write("Enter your choice: ");
-                   int.TryParse(Console.ReadLine(), out int choice);
+               Console.Write("Enter your choice: ");
+            
+                int.TryParse(Console.ReadLine(), out int choice);
 
                    switch (choice)
                    {
@@ -83,33 +98,47 @@ namespace BookStore
                                Author = author,
                                PublicationYear = year
                            };
-
-                           bookManager.AddBook(newBook);
-                           break;
+                        bookManager.AddBook(newBook);
+                        Console.Clear();
+                        Console.Write("***************************");
+                        Console.Write(" Book Added successfully : ");
+                        Console.Write("***************************");
+                        break;
                        case 2:
-                           Console.Write("Enter book Name or anything to search: ");
+                       
+                        Console.Write("Enter book Name or anything to search: ");
                             var search = Console.ReadLine();
                            var foundBook = bookManager.SearchBooks(search);
                             if (foundBook.Any())
                             {
-                            foreach (var book in foundBook)
-                            {
-                                Console.WriteLine($"Book found: {book.Title} by {book.Author}");
-                            }
-                             }
+                            Console.WriteLine("////////////////////////////////////////////");
+                                foreach (var book in foundBook)
+                                {
+                                 Console.WriteLine($"Book found: {book.Title} by {book.Author} Year: {book.PublicationYear}");
+                                }
+                            Console.WriteLine("////////////////////////////////////////////");
+
+                        }
                         else
                         {
                             Console.WriteLine("No books found matching your search criteria.");
                         }
                         break;
                        case 3:
-                           List<Book> allBooks = bookManager.GetAllBooks();
+                        Console.Clear();
+                        Console.WriteLine($" This is Default Books");
+                        Console.WriteLine($" **********************************");
+                        List<Book> allBooks = bookManager.GetAllBooks();
                            foreach (Book book in allBooks)
                            {
                                Console.WriteLine($"  Title: {book.Title}, Author: {book.Author}, Year: {book.PublicationYear}");
                            }
-                           break;
+                        Console.WriteLine($" **********************************");
+
+                    
+                        break;
                     case 4:
+                        Console.Clear();
                         // Edit Book
                         Console.Write("Enter the ID of the book to edit: ");
                         int bookId = int.Parse(Console.ReadLine());
@@ -126,6 +155,8 @@ namespace BookStore
 
 
                             Console.WriteLine("Book updated successfully!");
+                            Console.WriteLine("");
+                      
                         }
                         else
                         {
@@ -133,20 +164,49 @@ namespace BookStore
                         }
                         break;
                     case 5:
-                        Console.Write("Enter filename to save books: ");
-                        string filename = Console.ReadLine();
-                        bookManager.SaveBooksToFile(filename);
-
+                        Console.Write("Enter filename to save your books: ");
+                        string favorites = Console.ReadLine();
 
                         string desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-                        string filePath = Path.Combine(desktopPath,"BookData.txt");
-
-                        bookManager.SaveBooksToFile(filePath);
+                        string filePath = Path.Combine(desktopPath,$"{favorites}.txt");
+                        var favoriteBooks = bookManager.GetAllBooks();
+                        bookManager.SaveBooksToFile(filePath, favoriteBooks);
                         break;
                     case 6:
                         Console.Write("Enter filename to load books: ");
-                        filename = Console.ReadLine();
-                        bookManager.LoadBooksFromFile(filename);
+                        var getFavorites = Console.ReadLine();
+                        string getDesktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                        string getFavorieBooks = Path.Combine(getDesktopPath, $"{getFavorites}.txt");
+
+                        try
+                        {
+                            if (File.Exists(getFavorieBooks))
+                            {
+                                string json = File.ReadAllText(getFavorieBooks);
+                                List<Book> loadedBooks = JsonSerializer.Deserialize<List<Book>>(json);
+
+                                Console.WriteLine("Books before  from file.");
+                                Console.WriteLine("************************");
+                                foreach (Book loadedBook in loadedBooks)
+                                {
+                                    bookManager.GetAllBooks().Add(loadedBook);
+                                }
+                                Console.WriteLine("************************");
+                                Console.WriteLine("Books loaded successfully from file.");
+                              
+                                
+                       
+                            }
+                            else
+                            {
+                                Console.WriteLine("File not found.");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine("Error loading books from file: " + ex.Message);
+                        }
+                        Console.Write("successfully loaded favorite books. ");
                         break;
                     case 7:
                         Console.Write("Enter the ID of the book to delete: ");
@@ -157,8 +217,10 @@ namespace BookStore
                            Environment.Exit(0);
                            break;
                        default:
-                           Console.WriteLine("Invalid choice. Please try again.");
-                           break;
+                        Console.Clear();
+                        Console.WriteLine("Invalid choice. Please try again.");
+                   
+                        break;
                    }
                }
         }
