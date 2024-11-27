@@ -110,7 +110,9 @@ namespace BookStore
             if (bookToDelete != null)
             {
                 books.Remove(bookToDelete);
+                Console.WriteLine("****************************");
                 Console.WriteLine("Book deleted successfully.");
+                Console.Clear();
             }
             else
             {

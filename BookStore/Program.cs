@@ -68,11 +68,12 @@ namespace BookStore
                 Console.WriteLine("****************");
                 Console.WriteLine("4. Edit Book");
                 Console.WriteLine("****************");
-                Console.WriteLine("5. Save Book List");
+                Console.WriteLine("5. Delete Book ");
                 Console.WriteLine("****************");
-                Console.WriteLine("6. Get Favorite Book List ");
                 Console.WriteLine("****************");
-                Console.WriteLine("7. Delete Book ");
+                Console.WriteLine("6. Save Book List");
+                Console.WriteLine("7. Get Favorite Book List ");
+                Console.WriteLine("****************");
                 Console.WriteLine("****************");
                 Console.WriteLine("8. Exit");
                     
@@ -105,7 +106,6 @@ namespace BookStore
                         Console.Write("***************************");
                         break;
                        case 2:
-                       
                         Console.Write("Enter book Name or anything to search: ");
                             var search = Console.ReadLine();
                            var foundBook = bookManager.SearchBooks(search);
@@ -131,7 +131,7 @@ namespace BookStore
                         List<Book> allBooks = bookManager.GetAllBooks();
                            foreach (Book book in allBooks)
                            {
-                               Console.WriteLine($"  Title: {book.Title}, Author: {book.Author}, Year: {book.PublicationYear}");
+                               Console.WriteLine($"ID : {book.Id}  :    Title: {book.Title}, Author: {book.Author}, Year: {book.PublicationYear}");
                            }
                         Console.WriteLine($" **********************************");
 
@@ -147,13 +147,23 @@ namespace BookStore
                         if (bookToEdit != null)
                         {
                             Console.Write("Enter new title (or press Enter to keep the same): ");
-                            string newTitle = Console.ReadLine();
+                            var newTitle = Console.ReadLine();
                             if (!string.IsNullOrEmpty(newTitle))
                             {
                                 bookToEdit.Title = newTitle;
                             }
-
-
+                            Console.Write("Enter new Author (or press Enter to keep the same): ");
+                            var newAuthor = Console.ReadLine();
+                            if (!string.IsNullOrEmpty(newAuthor))
+                            {
+                                bookToEdit.Author = newAuthor;
+                            }
+                            Console.Write("Enter new Year (or press Enter to keep the same): ");
+                            int.TryParse(Console.ReadLine(), out int newYear);
+                            if ( newYear > 0)
+                            {
+                                bookToEdit.PublicationYear = newYear;
+                            }
                             Console.WriteLine("Book updated successfully!");
                             Console.WriteLine("");
                       
@@ -164,6 +174,12 @@ namespace BookStore
                         }
                         break;
                     case 5:
+                        Console.Write("");
+                        Console.Write("Enter the ID of the book to delete: ");
+                        int.TryParse(Console.ReadLine(), out int bookIdForDel);
+                        bookManager.DeleteBook(bookIdForDel);
+                        break;
+                    case 6:
                         Console.Write("Enter filename to save your books: ");
                         string favorites = Console.ReadLine();
 
@@ -172,9 +188,11 @@ namespace BookStore
                         var favoriteBooks = bookManager.GetAllBooks();
                         bookManager.SaveBooksToFile(filePath, favoriteBooks);
                         break;
-                    case 6:
+                    case 7:
                         Console.Write("Enter filename to load books: ");
                         var getFavorites = Console.ReadLine();
+
+                     
                         string getDesktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
                         string getFavorieBooks = Path.Combine(getDesktopPath, $"{getFavorites}.txt");
 
@@ -185,16 +203,14 @@ namespace BookStore
                                 string json = File.ReadAllText(getFavorieBooks);
                                 List<Book> loadedBooks = JsonSerializer.Deserialize<List<Book>>(json);
 
-                                Console.WriteLine("Books before  from file.");
-                                Console.WriteLine("************************");
+          
                                 foreach (Book loadedBook in loadedBooks)
                                 {
-                                    bookManager.GetAllBooks().Add(loadedBook);
+                                    bookManager.GetAllBooks().Clear();
+                                    bookManager.GetAllBooks().AddRange(loadedBooks);
                                 }
                                 Console.WriteLine("************************");
                                 Console.WriteLine("Books loaded successfully from file.");
-                              
-                                
                        
                             }
                             else
@@ -206,13 +222,9 @@ namespace BookStore
                         {
                             Console.WriteLine("Error loading books from file: " + ex.Message);
                         }
-                        Console.Write("successfully loaded favorite books. ");
+                   
                         break;
-                    case 7:
-                        Console.Write("Enter the ID of the book to delete: ");
-                         int.TryParse(Console.ReadLine(), out int bookIdForDel);
-                        bookManager.DeleteBook(bookIdForDel);
-                        break;
+              
                     case 8:
                            Environment.Exit(0);
                            break;
