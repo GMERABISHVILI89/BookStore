@@ -8,7 +8,7 @@ namespace BookStore
     class Program
     {
       
-        static async Task Main(string[] args)
+        static  Task Main(string[] args)
         {
             BookManager bookManager = new BookManager();
             List<Book> popularAuthors = new List<Book>()
@@ -29,34 +29,18 @@ namespace BookStore
                 new Book {Id = 14, Author = "Fyodor Dostoevsky", Title = "The Brothers Karamazov", PublicationYear = 1880 },
                 new Book {Id = 15, Author = "Leo Tolstoy", Title = "War and Peace", PublicationYear = 1869 }
                 };
-          
-            
-            using (HttpClient client = new HttpClient())
+
+            for (int i = 0; i < popularAuthors.Count; i++)
             {
-
-               // string apiUrl = "https://jsonplaceholder.typicode.com/posts";
-               // string responseBody = await client.GetStringAsync(apiUrl);
-
-                //List<Book> books = JsonSerializer.Deserialize<List<Book>>(responseBody);
-
-                // Take the first 15 books
-                // books = books.Take(15).ToList();
-
-                // data of popular authors to their books and publication years
-
-                for (int i = 0; i < popularAuthors.Count; i++)
-                {
-                  //  books[i] = popularAuthors[i];
-
-                    // წიგნების ლისტში დამატება
-                    bookManager.AddBook(popularAuthors[i]);
-                }
-
+                // add books to the list
+                bookManager.AddBook(popularAuthors[i]);
             }
+
+
             Console.WriteLine("Wellcome to BookStore");
             while (true)
             {
-             
+                #region console_menu
                 Console.WriteLine("");
                 Console.WriteLine("Enter Your Choice : ");
                 Console.WriteLine("");
@@ -76,72 +60,86 @@ namespace BookStore
                 Console.WriteLine("****************");
                 Console.WriteLine("****************");
                 Console.WriteLine("8. Exit");
-                    
-                    
-               Console.Write("Enter your choice: ");
-            
+                Console.Write("Enter your choice: ");
+
+
+                #endregion
+
                 int.TryParse(Console.ReadLine(), out int choice);
 
                    switch (choice)
                    {
-                       case 1:
+                     case 1:
                            Console.Write("Enter book title: ");
                            var title = Console.ReadLine();
                            Console.Write("Enter author name: ");
                            var author = Console.ReadLine();
                            Console.Write("Enter publication year: ");
                            int.TryParse(Console.ReadLine(), out int year);
+                          
 
-                           Book newBook = new Book
-                            {
-                               Id = bookManager.GetAllBooks().Count + 1,
-                               Title = title,
-                               Author = author,
-                               PublicationYear = year
-                           };
+                        Book newBook = new Book
+                        {
+                            Id = bookManager.GetAllBooks().Count + 1,
+                            Title = title,
+                            Author = author,
+                            PublicationYear = year
+                        };
+                       
                         bookManager.AddBook(newBook);
+                        #region book_added
                         Console.Clear();
                         Console.Write("***************************");
+                        Console.Write("");
                         Console.Write(" Book Added successfully : ");
+                        Console.Write("");
                         Console.Write("***************************");
+                        #endregion
                         break;
                        case 2:
+                        //Search
                         Console.Write("Enter book Name or anything to search: ");
-                            var search = Console.ReadLine();
+                           var search = Console.ReadLine();
+
+                            //  search method 
                            var foundBook = bookManager.SearchBooks(search);
-                            if (foundBook.Any())
-                            {
-                            Console.WriteLine("////////////////////////////////////////////");
+                        if (foundBook.Any())
+                        {
+
+                            Console.Clear();
+                                Console.WriteLine("books founded :");
+                                Console.WriteLine("////////////////////////////////////////////");
                                 foreach (var book in foundBook)
                                 {
                                  Console.WriteLine($"Book found: {book.Title} by {book.Author} Year: {book.PublicationYear}");
                                 }
-                            Console.WriteLine("////////////////////////////////////////////");
+                                Console.WriteLine("////////////////////////////////////////////");
 
                         }
                         else
                         {
+                            Console.Clear();
                             Console.WriteLine("No books found matching your search criteria.");
                         }
                         break;
                        case 3:
+                        //Book list 
                         Console.Clear();
                         Console.WriteLine($" This is Default Books");
                         Console.WriteLine($" **********************************");
                         List<Book> allBooks = bookManager.GetAllBooks();
                            foreach (Book book in allBooks)
                            {
-                               Console.WriteLine($"ID : {book.Id}  :    Title: {book.Title}, Author: {book.Author}, Year: {book.PublicationYear}");
+                               Console.WriteLine($"ID : {book.Id}  :    Title : {book.Title}, Author: {book.Author}, Year: {book.PublicationYear}");
                            }
-                        Console.WriteLine($" **********************************");
-
+                        Console.WriteLine($"**********************************");
                     
                         break;
                     case 4:
-                        Console.Clear();
                         // Edit Book
+                        Console.Clear();
                         Console.Write("Enter the ID of the book to edit: ");
-                        int bookId = int.Parse(Console.ReadLine());
+                        int.TryParse(Console.ReadLine(),out int bookId );
 
                         Book bookToEdit = bookManager.GetBookById(bookId);
                         if (bookToEdit != null)
@@ -234,7 +232,7 @@ namespace BookStore
                    
                         break;
                    }
-               }
+             }
         }
 
     }

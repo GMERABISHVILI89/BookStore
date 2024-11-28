@@ -12,15 +12,16 @@ namespace ATMApp
         private static long _ballance = 5000000;
         private static long _Updatedballance;
 
-
         private static int _newPinForLog;
         private static int _depositIn;
-
+        
+        
+        // Helper static functions
         public static string GetLatestPinRecord(string filePath)
         {
             if (!File.Exists(filePath))
             {
-                return null; // File doesn't exist
+                return "file not found"; // File doesn't exist
             }
 
             // ყველაფრის წაკითხვა ფაილში
@@ -40,7 +41,7 @@ namespace ATMApp
 
             return pinCode;
         }
-        // Helper static functions
+    
         public static long GetBalance()
         {
             return _ballance;
@@ -49,9 +50,7 @@ namespace ATMApp
         {
             return _Updatedballance;
         }
-       
-        
-        // 
+
         public static int GetPin()
         {
             string latestPin;
@@ -59,7 +58,7 @@ namespace ATMApp
             string bankFolderPath = Path.Combine(desktopPath, "MY-Bank");
             if (Directory.Exists(bankFolderPath))
             {
-                string subFolderName = DateTime.Now.ToString("yyyyMMdd_HH");
+                string subFolderName = $"Operations-on{DateTime.Now.ToString("yyyyMMdd_HH")}";
                 string subFolderPath = Path.Combine(bankFolderPath, subFolderName);
 
                 if (Directory.Exists(subFolderPath))
@@ -123,15 +122,12 @@ namespace ATMApp
                 Description = description;
             }
         }
-
    
 
         static void Main(string[] args)
         {
 
             string bankFolder = "MY-Bank";
-
-            // path ნახვა desktopze და folder შექმნა სახელით  "MY-Bank";
 
             string desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
             string bankFolderPath = Path.Combine(desktopPath, bankFolder);
@@ -142,10 +138,9 @@ namespace ATMApp
                 Directory.CreateDirectory(bankFolderPath);
             }
 
-
-            int pin = 1234;
             int attempts = 3;
             bool exitApp = true;
+
             MenuOption[] menuOptions = {
                new MenuOption(0,"Check Balance"),
                new MenuOption(1, "Withdraw Money"),
@@ -176,15 +171,18 @@ namespace ATMApp
                     switch (choice)
                     {
                         case 0:
-                            Console.WriteLine("Your balance is: " + GetBalance());
+                            Console.WriteLine("Your balance is: " + GetBalance() + " USD");
                             break;
                         case 1:
+                            
                             Console.Write("Enter the amount to withdraw: ");
+                           
                             long.TryParse(Console.ReadLine(), out long withdrawAmount);
+
                             if (withdrawAmount <= GetBalance())
                             {
                                 UpdateBalance(GetBalance() - withdrawAmount);
-                                Console.WriteLine("Withdrawal successful. New balance: " + GetUpdatedBalance());
+                                Console.WriteLine("Withdrawal successful. New balance: " + GetUpdatedBalance() + " USD");
                             }
                             else
                             {
@@ -193,6 +191,7 @@ namespace ATMApp
                             break;
                         case 2:
                             Console.Write("Please Enter your old PIN: ");
+
                             int.TryParse(Console.ReadLine(), out int oldPin);
 
                             if(oldPin == GetPin())
@@ -218,10 +217,10 @@ namespace ATMApp
                             break;
                         case 3:
 
-                            Console.Write("How Much Money do you want to Deposit ? ");
+                            Console.Write("How Much Money do you want to Deposit ? :  ");
                             int.TryParse(Console.ReadLine(), out int deposit);
                             UpdateBalance(GetBalance() + deposit);
-                            Console.WriteLine("Deposit was Added successful. New balance: " + GetUpdatedBalance());
+                            Console.WriteLine("Deposit was Added successful. New balance: " + GetUpdatedBalance() + " USD");
                             DepositeIn(deposit);
                             break;
 
@@ -237,10 +236,10 @@ namespace ATMApp
                                 if (transferAmount <= GetBalance())
                                 {
                                     UpdateBalance(GetBalance() - transferAmount);
-                                    Console.WriteLine($"Transfer of {transferAmount} to {recipientAccount} successful. New balance: {GetUpdatedBalance()}");
+                                    Console.WriteLine($"Transfer of {transferAmount} -USD-  to {recipientAccount}  successful. New balance: {GetUpdatedBalance()}");
 
                                     //  // ტრანსფერის ფოლდერის შექმნა (yyyyMMdd_HHmm) წუთებით
-                                    string transferFolderName = $"Transfer_{DateTime.Now:yyyyMMdd_HH}";
+                                    string transferFolderName = $"Cash_Transfers_On-{DateTime.Now:yyyyMMdd_HH}";
                                     string transferFolderPath = Path.Combine(bankFolderPath, transferFolderName);
 
                                     if (!Directory.Exists(transferFolderPath))
@@ -277,9 +276,8 @@ namespace ATMApp
                     }
 
                     // ქვეფოლდერის შექმა თარიღის მიხედვით (წუთების სხვაობით იქმნება ახალი)
-                    string subFolderName = DateTime.Now.ToString("yyyyMMdd_HH");
+                    string subFolderName = $"Operations-on{DateTime.Now.ToString("yyyyMMdd_HH")}";
                     string subFolderPath = Path.Combine(bankFolderPath, subFolderName);
-
                   
                     if (!Directory.Exists(subFolderPath))
                     {
@@ -288,10 +286,7 @@ namespace ATMApp
 
                     string filePath = Path.Combine(subFolderPath, "log-operations.txt");
 
-
-
                     //StreamWriter  Open in append mode დამატებისთვის ახალი ხაზიდან
-
                     using (StreamWriter writer = new StreamWriter(filePath, true))
                     {
 
@@ -300,7 +295,6 @@ namespace ATMApp
                         try
                         {
                                 writer.WriteLine("Operation:" + menuOptions[choice].Description);
-
                                 // აქ ხდება შემოწმება თუ პინკოდის ცვლილებაა ვინახავთ ახალ პინკოდს ბაზაში
                                 if (menuOptions[choice].Description == "Change PIN")
                                 {

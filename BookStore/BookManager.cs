@@ -10,7 +10,7 @@ namespace BookStore
     public class BookManager
     {
         private List<Book> _books;
-        private List<Book> favoriteBooks = new List<Book>();
+
         public BookManager()
         {
             _books = new List<Book>();
